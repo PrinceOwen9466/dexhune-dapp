@@ -23,15 +23,32 @@
         <img class="ava-logo" src="~/src/assets/avalanche-logo.svg" alt="">
       </a>
     </div>
+
+    <div class="-flex">
+      <PricePanel class="-ml-auto" />
+    </div>
+
+    <div class="-flex -bg-black -p-4 welcome-panel">
+      <img src="~/src/assets/tbltve.png" alt="">
+      <div class="-my-auto">
+        Swap Dx tokens for AVAX and vice versa! List your own pegged tokens relative to gold or any dataset! Dexhune is a
+        peer-based distributed exchange that connects buyers and sellers directly using fixed pricing derived from a
+        decentralized oracle, liquidity is enhanced by single-sided non-removable liquidity pools
+      </div>
+    </div>
+
+    <ExchangePanel />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import AppHeader from "src/components/AppHeader.vue";
+import PricePanel from "src/components/PricePanel.vue";
+import ExchangePanel from "src/components/ExchangePanel.vue";
 
 export default defineComponent({
-  components: { AppHeader },
+  components: { AppHeader, PricePanel, ExchangePanel },
   setup() {
     return {};
   }
@@ -46,8 +63,18 @@ export default defineComponent({
   background-color: var(--secondary-dark-color);
 
   a {
-    padding-right: 10px;
+    padding-right: 14px;
     height: 32px;
+    margin-top: auto;
+    margin-bottom: auto;
+
+    &:last-of-type {
+      padding-right: 0;
+    }
+
+    // a:nth-last-of-type() {
+    //   padding-right: 0;
+    // }
   }
 
   img {
@@ -55,7 +82,20 @@ export default defineComponent({
   }
 
   .ava-logo {
+    margin-top: 3px;
     height: 28px;
+  }
+}
+
+.welcome-panel {
+  width: 80%;
+  margin-top: 40px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 24px;
+
+  img {
+    height: 320px;
   }
 }
 </style>

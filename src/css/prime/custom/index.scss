@@ -5,9 +5,15 @@ $primaryTextColor: #ffffff;
 $secondaryColor: #950101;
 $secondaryTextColor: #fff;
 
+$secondaryDarkColor: #3d0000;
+
 .bg-secondary {
   background-color: $secondaryColor;
   color: $secondaryTextColor;
+}
+
+.bg-dark-secondary {
+  background-color: $secondaryDarkColor;
 }
 
 .color-secondary {
@@ -17,4 +23,11 @@ $secondaryTextColor: #fff;
 .p-card {
   background-color: $secondaryColor;
   color: $secondaryTextColor;
+}
+
+.p-inputtext {
+  background-color: $primaryDarkerColor;
+  color: $secondaryTextColor;
+
+  border: 1px solid $primaryColor;
 }
