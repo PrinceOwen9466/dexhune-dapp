@@ -1,0 +1,20 @@
+$primaryColor: #222;
+$primaryDarkColor: #111;
+$primaryDarkerColor: #000;
+$primaryTextColor: #ffffff;
+$secondaryColor: #950101;
+$secondaryTextColor: #fff;
+
+.bg-secondary {
+  background-color: $secondaryColor;
+  color: $secondaryTextColor;
+}
+
+.color-secondary {
+  color: $secondaryColor;
+}
+
+.p-card {
+  background-color: $secondaryColor;
+  color: $secondaryTextColor;
+}
