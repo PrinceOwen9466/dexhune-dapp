@@ -20,14 +20,59 @@ $secondaryDarkColor: #3d0000;
   color: $secondaryColor;
 }
 
-.p-card {
-  background-color: $secondaryColor;
-  color: $secondaryTextColor;
-}
+// .p-card-secondary {
+//   background-color: $secondaryColor;
+//   color: $secondaryTextColor;
+// }
 
 .p-inputtext {
   background-color: $primaryDarkerColor;
   color: $secondaryTextColor;
 
   border: 1px solid $primaryColor;
+}
+
+// .p-button-secondary {
+//   background-color: $secondaryColor;
+// }
+
+.p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
+  border-radius: 0px;
+}
+
+.p-menuitem-link {
+  background-color: #4b0101;
+  border-bottom: 1px solid transparent;
+
+  font-size: 24px;
+  font-weight: 600;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  padding-top: 8px;
+  padding-bottom: 10px;
+  
+  .p-menuitem-text {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}
+
+.p-highlight .p-menuitem-link {
+  background-color: $secondaryColor;
+}
+
+.p-tabmenu .p-tabmenu-nav {
+  border-bottom: 2px solid transparent;
+}
+
+.p-inputtext {
+  border: 1px solid transparent;
+
+  &:focus {
+    box-shadow: 0 0 0 0.2rem primaryDarkerColor;//rgba(167, 139, 250, 0.2);
+  }
+}
+
+:root {
+  --secondary-color: #950101;
+  --secondary-dark-color: #3d0000;
 }

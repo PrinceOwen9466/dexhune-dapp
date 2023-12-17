@@ -6,6 +6,7 @@ import Tooltip from "primevue/tooltip";
 
 import TabMenu from "primevue/tabmenu";
 import InputText from "primevue/inputtext";
+import Skeleton from "primevue/skeleton";
 
 // import "primevue/resources/themes/lara-light-green/theme.css"
 
@@ -15,6 +16,7 @@ export default bootstrap(({ app }) => {
 	app.component("PrimeCard", Card);
 	app.component("PrimeTabMenu", TabMenu);
 	app.component("PrimeInput", InputText);
+	app.component("PrimeSkeleton", Skeleton);
 
 	app.directive("tooltip", Tooltip);
 });

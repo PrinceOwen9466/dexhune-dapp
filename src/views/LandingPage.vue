@@ -38,6 +38,37 @@
     </div>
 
     <ExchangePanel />
+
+    <PrimeCard class="-mt-20 illustration-card" style="background: #000">
+      <template #content>
+        <div class="illustration -flex -flex-col">
+          <img src="~/src/assets/illustrations/cherry/cherry-coming-soon.png" alt="Coming Soon" class="-mx-auto">
+
+          <h2 class="-mb-0">
+            💘 from Dexhune
+          </h2>
+
+          <h3 class="-mt-0">
+            More panels and features in progress
+          </h3>
+
+          <div class="-flex -mx-auto">
+            <PrimeSkeleton width="8rem" height="10rem"></PrimeSkeleton>
+
+            <div class="-ml-2 -mb-auto -flex -flex-col" style="height: 10rem">
+              <PrimeSkeleton width="8rem" height="4rem" class="-mt-0" />
+
+              <PrimeSkeleton width="8rem" class="-mt-auto"></PrimeSkeleton>
+              <PrimeSkeleton width="8rem" class="-mt-1"></PrimeSkeleton>
+              <PrimeSkeleton width="8rem" class="-mt-1"></PrimeSkeleton>
+              <PrimeSkeleton width="8rem" class="-mt-1"></PrimeSkeleton>
+            </div>
+
+          </div>
+        </div>
+      </template>
+
+    </PrimeCard>
   </div>
 </template>
 
@@ -96,6 +127,12 @@ export default defineComponent({
 
   img {
     height: 320px;
+  }
+}
+
+.illustration {
+  img {
+    width: 300px;
   }
 }
 </style>

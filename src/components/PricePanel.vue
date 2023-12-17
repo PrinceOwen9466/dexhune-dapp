@@ -9,7 +9,9 @@
     </h3>
 
     <div class="-ml-auto -mt-auto">
-      <PrimeButton v-tooltip.bottom="'Sample help information'" link icon="pi pi-check" label="x" />
+      <PrimeButton v-tooltip.bottom="'Sample help information'" link icon="pi pi-check">
+        <!-- <i class="pi pi-check"></i> -->
+      </PrimeButton>
       <PrimeButton label="Query" raised />
     </div>
 
