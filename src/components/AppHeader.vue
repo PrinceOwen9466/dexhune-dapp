@@ -100,7 +100,7 @@ export default defineComponent({
         projectId: wallet.projectId
       });
 
-      modal.subscribeState(handleModalChanged);
+      // modal.subscribeState(handleModalChanged);
       modal.subscribeEvents((ev) => {
         console.log("New WC Event", ev);
       });
@@ -127,14 +127,14 @@ export default defineComponent({
     //   }
     // }
 
-    function handleModalChanged(st: Web3ModalState) {
-      // if (!st.open) {
-      //   const modal = state.modal;
-      //   if (modal.getIsConnected() && !wallet.connected) {
-      //     setProvider(modal.getWalletProvider());
-      //   }
-      // }
-    }
+    // function handleModalChanged(st: Web3ModalState) {
+    //   // if (!st.open) {
+    //   //   const modal = state.modal;
+    //   //   if (modal.getIsConnected() && !wallet.connected) {
+    //   //     setProvider(modal.getWalletProvider());
+    //   //   }
+    //   // }
+    // }
 
     function handleProviderChanged(ev: EthersStoreUtilState) {
       setProvider(ev.provider);

@@ -21,7 +21,7 @@ import type {
 	TypedLogDescription,
 	TypedListener,
 	TypedContractMethod,
-} from "../common";
+} from "./contract-common";
 
 export declare namespace DexhuneExchangeBase {
 	export type OrderStruct = {
