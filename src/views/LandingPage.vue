@@ -3,29 +3,29 @@
     <AppHeader />
 
     <div class="bg-secondary -p-2 -mt-10 link-panel">
-      <a href="https://github.com/ElixExo/PengProtocol/tree/Dexhune">
+      <a v-tooltip.bottom="'Github'" href="https://github.com/ElixExo/PengProtocol/tree/Dexhune" target="_blank">
         <img src="~/src/assets/github.svg" alt="">
       </a>
 
-      <a href="https://github.com/ElixExo/PengProtocol/tree/Dexhune">
+      <a v-tooltip.bottom="'White Paper'" href="https://files.catbox.moe/iwn6lg.pdf" target="_blank">
         <img src="~/src/assets/document.svg" alt="">
       </a>
 
-      <a href="https://github.com/ElixExo/PengProtocol/tree/Dexhune">
+      <a v-tooltip.bottom="'Dexhune Token'" :href="tokenLink" target="_blank">
         <img class="ava-logo" src="~/src/assets/avalanche-logo.svg" alt="">
       </a>
 
-      <a href="https://github.com/ElixExo/PengProtocol/tree/Dexhune">
+      <a v-tooltip.bottom="'Dexhune PriceDAO'" :href="daoLink" target="_blank">
         <img class="ava-logo" src="~/src/assets/avalanche-logo.svg" alt="">
       </a>
 
-      <a href="https://github.com/ElixExo/PengProtocol/tree/Dexhune">
+      <a v-tooltip.bottom="'Dexhune Exchange'" :href="fxLink" target="_blank">
         <img class="ava-logo" src="~/src/assets/avalanche-logo.svg" alt="">
       </a>
     </div>
 
     <div class="-flex">
-      <PricePanel class="-ml-auto" />
+      <PricePanel v-if="isConnected" class="-ml-auto" />
     </div>
 
     <div class="-flex -bg-black -p-4 welcome-panel">
@@ -49,7 +49,7 @@
           </h2>
 
           <h3 class="-mt-0">
-            More panels and features in progress
+            We're working!.... More panels and features coming soon 😅
           </h3>
 
           <div class="-flex -mx-auto">
@@ -73,15 +73,26 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { computed, defineComponent, reactive, toRefs } from "vue";
 import AppHeader from "src/components/AppHeader.vue";
 import PricePanel from "src/components/PricePanel.vue";
 import ExchangePanel from "src/components/ExchangePanel.vue";
+import { useWalletStore } from "@/stores/wallet";
 
 export default defineComponent({
   components: { AppHeader, PricePanel, ExchangePanel },
   setup() {
-    return {};
+    const wallet = useWalletStore();
+    const state = reactive({
+      fxLink: wallet.fxLink,
+      daoLink: wallet.daoLink,
+      tokenLink: wallet.tokenLink,
+      isConnected: computed(() => wallet.connected)
+    });
+
+    return {
+      ...toRefs(state)
+    };
   }
 })
 </script>
@@ -94,13 +105,20 @@ export default defineComponent({
   background-color: var(--secondary-dark-color);
 
   a {
-    padding-right: 14px;
+    margin-right: 14px;
     height: 32px;
     margin-top: auto;
     margin-bottom: auto;
 
+    &:hover {
+      img {
+        filter: drop-shadow(0px 0px 7px #fff);
+      }
+    }
+
     &:last-of-type {
-      padding-right: 0;
+      // padding-right: 0;
+      margin-right: 0;
     }
 
     // a:nth-last-of-type() {

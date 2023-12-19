@@ -5,14 +5,15 @@
     </h3>
 
     <h3 class="-text-black -m-0">
-      {{ price }} DXH to 1 AVAX
+
+      1 DXH to {{ price.toFixed(2) }} AVAX
     </h3>
 
-    <div class="-ml-auto -mt-auto">
-      <PrimeButton v-tooltip.bottom="'Sample help information'" link icon="pi pi-check">
-        <!-- <i class="pi pi-check"></i> -->
-      </PrimeButton>
-      <PrimeButton label="Query" raised />
+    <div class="-ml-auto -mt-4">
+      <!-- <PrimeButton v-tooltip.bottom="'Sample help information'" link icon="pi pi-check">
+        
+      </PrimeButton> -->
+      <PrimeButton label="Query" raised :loading="busy" @click="queryPrice" />
     </div>
 
   </div>
@@ -20,7 +21,7 @@
 
 <script lang="ts">
 import { useWalletStore } from "@/stores/wallet";
-import { computed, defineComponent, reactive, toRefs } from "vue"
+import { computed, defineComponent, onMounted, reactive, toRefs } from "vue"
 
 export default defineComponent({
   setup() {
@@ -28,11 +29,27 @@ export default defineComponent({
 
     const price = computed(() => wallet.price);
     const state = reactive({
-      price
+      price,
+      busy: false
     });
 
+    function queryPrice() {
+      if (state.busy) {
+        return;
+      }
+
+      state.busy = true;
+
+      wallet.queryPrice().finally(() => {
+        state.busy = false;
+      })
+    }
+
+    onMounted(queryPrice);
+
     return {
-      ...toRefs(state)
+      ...toRefs(state),
+      queryPrice
     }
   }
 })
