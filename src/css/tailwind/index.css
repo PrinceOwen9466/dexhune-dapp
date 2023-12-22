@@ -57,6 +57,10 @@
   margin-top: 2.5rem
 }
 
+.-mt-16 {
+  margin-top: 4rem
+}
+
 .-mt-2 {
   margin-top: 0.5rem
 }
@@ -79,10 +83,6 @@
 
 .-mt-auto {
   margin-top: auto
-}
-
-.-mt-16 {
-  margin-top: 4rem
 }
 
 .-block {
@@ -174,11 +174,6 @@
 .-text-sm {
   font-size: 0.875rem;
   line-height: 1.25rem
-}
-
-.-text-lg {
-  font-size: 1.125rem;
-  line-height: 1.75rem
 }
 
 .-font-bold {
