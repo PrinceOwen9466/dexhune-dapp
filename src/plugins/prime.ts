@@ -23,6 +23,8 @@ import ConfirmDialog from "primevue/confirmdialog";
 import ToastService from "primevue/toastservice";
 import ConfirmationService from "primevue/confirmationservice";
 
+import "primeicons/primeicons.css";
+
 // import "primevue/resources/themes/lara-light-green/theme.css"
 
 export default bootstrap(({ app }) => {
