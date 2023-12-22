@@ -193,6 +193,7 @@ export const useWalletStore = defineStore("Wallet", {
 			Token = Token.connect(signer);
 			FX = FX.connect(signer);
 
+			this.tokenMap.clear();
 			this.fetchTokens();
 
 			this.connected = true;
