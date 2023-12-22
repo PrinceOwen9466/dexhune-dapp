@@ -31,7 +31,7 @@
     <div class="-flex -bg-black -p-3 md:-p-4 welcome-panel">
       <img src="~/src/assets/tbltve.png" alt="">
       <div class="-my-auto">
-        Dexhune is permissionless orderbook! Turn your volume into liquidity!
+        Dexhune is a permissionless orderbook! Turn your volume into liquidity!
       </div>
     </div>
 
@@ -50,7 +50,7 @@
             More panels and features coming soon
           </h3>
 
-          <div class="-flex -mx-auto">
+          <!-- <div class="-flex -mx-auto">
             <PrimeSkeleton width="8rem" height="10rem"></PrimeSkeleton>
 
             <div class="-ml-2 -mb-auto -flex -flex-col" style="height: 10rem">
@@ -62,11 +62,35 @@
               <PrimeSkeleton width="8rem" class="-mt-1"></PrimeSkeleton>
             </div>
 
-          </div>
+          </div> -->
         </div>
       </template>
 
     </PrimeCard>
+
+    <div class="bg-secondary -mx-auto -p-2  link-panel -mt-16">
+      <a v-tooltip.top="'Telegram'" href="https://t.me/dexhune/1" target="_blank">
+        <img src="~/src/assets/bxl-telegram.svg" alt="">
+      </a>
+
+      <a v-tooltip.top="'Reddit'" href="https://www.reddit.com/r/Peng_Protocol/" target="_blank">
+        <img src="~/src/assets/bxl-reddit.svg" alt="">
+      </a>
+
+      <a v-tooltip.top="'Twitter'" href="https://x.com/Dexhune?t=9AzlsaYxRDlpVsMSHqKhkQ&s=09" target="_blank">
+        <img src="~/src/assets/twitter.svg" alt="">
+      </a>
+    </div>
+
+    <div class="footer-stack -mt-10">
+      <div class="-flex -gap-2 -ml-auto -flex-wrap -justify-end">
+        <img src="~/src/assets/c-chain.png" alt="Backed on C-Chain">
+
+        <img src="~/src/assets/ipfs.png" alt="Frontend on IPFS">
+
+        <img src="~/src/assets/dappling.png" alt="Deployed via Dappling">
+      </div>
+    </div>
   </div>
 </template>
 
@@ -137,41 +161,57 @@ export default defineComponent({
 }
 
 .welcome-panel {
-  width: 60%;
+  width: 50%;
   margin-top: 40px;
   margin-bottom: 80px;
   margin-left: auto;
   margin-right: auto;
-  font-size: 24px;
+  font-size: 16px;
   font-weight: 500;
-  text-align: left;
+  text-align: center;
 
   img {
-    width: 150px;
+    width: 100px;
     object-fit: contain;
   }
 }
 
 .illustration {
   img {
-    width: 300px;
+    width: 250px;
+  }
+}
+
+.footer-stack {
+  display: flex;
+
+  img {
+    height: 70px;
   }
 }
 
 @include media ("<=tablet") {
   .welcome-panel {
-    width: 80%;
+    width: 70%;
   }
 }
 
 @include media("<=phone") {
   .welcome-panel {
     width: 90%;
-    font-size: 20px;
+    font-size: 12px;
     margin-bottom: 40px;
+    font-weight: 400;
 
     img {
-      width: 100px;
+      width: 70px;
+    }
+  }
+
+  .footer-stack {
+
+    img {
+      height: 45px;
     }
   }
 }

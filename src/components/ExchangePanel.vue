@@ -59,7 +59,8 @@ export default defineComponent({
       tokens: computed(() => wallet.tokens),
       busy: {
         buy: false,
-        sell: false
+        sell: false,
+        clear: false
       }
     });
 
@@ -148,6 +149,8 @@ export default defineComponent({
           }
         }).finally(() => busy.buy = false)
     }
+
+
 
     return {
       ...toRefs(state),

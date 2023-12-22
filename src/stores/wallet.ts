@@ -185,6 +185,8 @@ export const useWalletStore = defineStore("Wallet", {
 			const provider = new BrowserProvider(prov);
 			const signer = await provider.getSigner();
 
+			await provider._detectNetwork();
+
 			this.address = await signer.getAddress();
 			_provider = provider;
 			_signer = signer;
@@ -253,6 +255,14 @@ export const useWalletStore = defineStore("Wallet", {
 			}
 		},
 
+		async clearOrders() {
+			try {
+				await FX.clearOrders();
+			} catch (err) {
+				return getDAppError(err);
+			}
+		},
+
 		async buyFX(address: string, amount: bigint) {
 			const provider = _provider;
 			if (!provider) {
@@ -263,6 +273,8 @@ export const useWalletStore = defineStore("Wallet", {
 				await FX.createBuyOrder(address, {
 					value: amount,
 				});
+
+				await FX.settleOrders(address, true);
 			} catch (err) {
 				return getDAppError(err);
 			}
@@ -276,6 +288,7 @@ export const useWalletStore = defineStore("Wallet", {
 
 			try {
 				await FX.createSellOrder(address, amount);
+				await FX.settleOrders(address, false);
 			} catch (err) {
 				return getDAppError(err);
 			}

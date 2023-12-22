@@ -16,8 +16,8 @@
           <PrimeButton v-if="!isConnected" size="small" label="Connect Wallet" raised @click="connect" />
 
           <div v-else class="-flex">
-            <PrimeInputGroup v-if="_mq.mdPlus" @click="handleCopy">
-              <PrimeInputGroupAddon v-if="_mq.mdPlus">
+            <PrimeInputGroup v-if="_mq.mdPlus">
+              <PrimeInputGroupAddon v-if="_mq.mdPlus" @click="handleCopy">
                 <i class='bx bxs-wallet'></i>
               </PrimeInputGroupAddon>
 
@@ -136,14 +136,13 @@ export default defineComponent({
       });
 
       // modal.subscribeState(handleModalChanged);
-      modal.subscribeEvents((ev) => {
-        console.log("New WC Event", ev);
-      });
+      // modal.subscribeEvents((ev) => {
+      //   console.log("New WC Event", ev);
+      // });
       modal.subscribeProvider(handleProviderChanged);
-      modal.subscribeSIWEState((ev) => {
-        console.log("New SIWE State", ev);
-      });
-      console.log(modal);
+      // modal.subscribeSIWEState((ev) => {
+      //   console.log("New SIWE State", ev);
+      // });
 
     }
 
@@ -275,6 +274,17 @@ export default defineComponent({
 .app-header-pattern {
   background: url("../assets/peng_pattern.png");
   background-position: left -40px top -20px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-header {
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.20) 0%, rgba(0, 0, 0, 0.20) 100%), linear-gradient(87deg, #950101 76.24%, #3D0000 123.05%);
+  }
+
+  .app-header-pattern {
+    background: url("../assets/peng_pattern.png");
+    background-position: left -40px top -20px;
+  }
 }
 
 .small-wallet {

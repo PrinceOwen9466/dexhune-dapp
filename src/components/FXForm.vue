@@ -5,7 +5,7 @@
         <div class="-flex -flex-col -gap-2 -flex-grow">
           <PrimeDropdown v-model="model.address" :focused-option-index="1" editable :options="tokens" option-label="addr"
             :class="{ 'p-invalid': errors.address }" :aria-describedby="addrErrorId" option-value="addr"
-            placeholder="Select a token" class="w-full md:w-14rem">
+            placeholder="Token Address" class="w-full md:w-14rem">
             <template #option="p">
               <div class="-flex -flex-col">
                 <div>
@@ -50,8 +50,13 @@
         </div>
       </div>
 
-      <PrimeButton :label="isBuy ? 'Buy' : 'Sell'" class="-mt-8 -ml-auto" severity="secondary" size="large"
-        style="width: 200px" :loading="busy || normalizing" type="submit" />
+      <div class="-flex -mt-8">
+        <PrimeButton label="Clear Orders" class=" -ml-auto" style="width: 150px" :loading="clearing"
+          @click="clearOrders" />
+
+        <PrimeButton :label="isBuy ? 'Buy' : 'Sell'" class="-ml-2" severity="secondary" style="width: 150px"
+          :loading="busy || normalizing" type="submit" />
+      </div>
     </div>
   </form>
 </template>
@@ -60,6 +65,7 @@
 import { ErrorMap, ExchangeDataModel, Token, hasError } from "@/models";
 import { useWalletStore } from "@/stores/wallet";
 import { isAddress } from "ethers";
+import { useToast } from "primevue/usetoast";
 import underscore from "underscore";
 import { take } from "underscore";
 import { computed, defineComponent, reactive, toRefs, watch } from "vue";
@@ -83,6 +89,7 @@ export default defineComponent({
       } as ExchangeDataModel;
     };
 
+    const toast = useToast();
     const wallet = useWalletStore();
 
     const state = reactive({
@@ -93,6 +100,7 @@ export default defineComponent({
       errors: noerrors(),
       nAmount: BigInt(0),
       normalizing: false,
+      clearing: false,
 
       addrErrorId: computed(() => `${props.isBuy ? "buy" : "sell"}-address-error`),
       amountErrorId: computed(() => `${props.isBuy ? "buy" : "sell"}-amount-error`),
@@ -128,6 +136,28 @@ export default defineComponent({
         return res;
       })
     });
+
+    function clearOrders() {
+      if (state.clearing) {
+        return;
+      }
+
+      state.clearing = true;
+
+      wallet.clearOrders()
+        .then((err) => {
+          if (err) {
+            toast.add({
+              severity: "error",
+              summary: "Failed to clear orders",
+              group: "fx-toast",
+              detail: err.message,
+              life: 3000
+            });
+          }
+        })
+        .finally(() => state.clearing = false);
+    }
 
 
     function findToken(addr: string) {
@@ -190,6 +220,7 @@ export default defineComponent({
     return {
       ...toRefs(state),
       ...toRefs(_state),
+      clearOrders,
       handleSubmit() {
         const model = state.model;
         const errors = state.errors;
