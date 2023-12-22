@@ -210,21 +210,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss">
-@import "src/css/@include-media.scss";
-
-// .fx-form {
-//   .fx-amt-panel {
-//     width: 60%;
-//   }
-// }
-
-// @include media("<=tablet") {
-//   .fx-form {
-//     .fx-amt-panel {
-//       width: 100%;
-//     }
-//   }
-// }
-</style>
