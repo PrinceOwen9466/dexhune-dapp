@@ -6,6 +6,20 @@ export interface ChainNetwork {
 	explorerUrl: string;
 }
 
+export interface Token {
+	tokenNo: number;
+	name: string;
+	sym: string;
+	addr: string;
+	parityAddr: string;
+	reward: number;
+	rewardThreshold: number;
+	scheme: number;
+	price: number;
+	orders: number;
+	decimals?: number;
+}
+
 export interface ExchangeDataModel {
 	address: string;
 	amount: number;

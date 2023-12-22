@@ -9,85 +9,46 @@
     <PrimeTabMenu v-model:activeIndex="tabIndex" :model="tabs" />
 
     <div class="-mt-10">
-      <form v-show="tabIndex == 0" @submit.prevent="submitBuy">
-        <div class="-flex -flex-col">
-          <div class="-flex">
-            <div class="-flex -flex-col -gap-2 -flex-grow">
-              <PrimeInput v-model="buyModel.address" type="text" placeholder="Token Address"
-                :class="{ 'p-invalid': errors.buy.address }" aria-describedby="buy-address-error" />
-
-              <small v-if="errors.buy.address" id="buy-address-error" class="-text-left">{{ errors.buy.address }}</small>
-            </div>
-
-            <div v-show="buyModel.address != dxhAddress">
-              <PrimeButton label="DXH" class="-ml-4" severity="secondary" @click="setDefaultAddr(true)" />
-            </div>
-          </div>
-
-          <div class="-mt-4 -flex -flex-col -gap-2">
-            <PrimeInput v-model.number="buyModel.amount" type="text" placeholder="Amount" style="width: 60%;"
-              :class="{ 'p-invalid': errors.buy.amount }" aria-describedby="buy-address-amount" />
-
-            <small v-if="errors.buy.amount" id="buy-address-amount" class="-text-left">{{ errors.buy.amount }}</small>
-          </div>
-
-          <PrimeButton label="Buy" class="-mt-8" severity="secondary" size="large" style="width: 200px"
-            :loading="busy.buy" type="submit" />
-        </div>
-      </form>
-
-      <form v-show="tabIndex == 1" @submit.prevent="submitSell">
-        <div class="-flex -flex-col">
-          <div class="-flex">
-            <div class="-flex -flex-col -gap-2 -flex-grow">
-              <PrimeInput v-model="sellModel.address" type="text" placeholder="Token Address"
-                :class="{ 'p-invalid': errors.sell.address }" aria-describedby="sell-address-error" />
-
-              <small v-if="errors.sell.address" id="sell-address-error" class="-text-left">{{ errors.sell.address
-              }}</small>
-            </div>
-
-            <div v-show="sellModel.address != dxhAddress">
-              <PrimeButton label="DXH" class="-ml-4" severity="secondary" @click="setDefaultAddr(false)" />
-            </div>
-
-          </div>
-          <!-- <PrimeInput v-model="sellModel.amount" type="text" placeholder="Amount" class="-mt-4" style="width: 60%;"
-            :class="{ 'p-invalid': errors.buy.amount }" /> -->
-
-          <div class="-mt-4 -flex -flex-col -gap-2">
-            <PrimeInput v-model.number="sellModel.amount" type="text" placeholder="Amount" style="width: 60%;"
-              :class="{ 'p-invalid': errors.sell.amount }" aria-describedby="sell-address-amount" />
-
-            <small v-if="errors.sell.amount" id="sell-address-amount" class="-text-left">{{ errors.sell.amount }}</small>
-          </div>
-
-          <PrimeButton label="Sell" class="-mt-8" severity="secondary" size="large" style="width: 200px"
-            :loading="busy.sell" type="submit" />
-        </div>
-      </form>
+      <FXForm v-show="tabIndex == 0" :is-buy="true" @submitted="handleBuy" />
+      <FXForm v-show="tabIndex == 1" :is-buy="false" @submitted="handleSell" />
     </div>
+
+    <PrimeConfirmDialog group="fx-confirm">
+      <template #container="{ message, acceptCallback, rejectCallback }">
+        <div class="-flex -flex-col -align-items-center -p-4 -px-8">
+          <span class="-font-bold -text-2xl -block -mb-0 -mt-2">{{ message.header }}</span>
+
+          <p class="-my-0">{{ message.message }}</p>
+
+          <div class="-flex -align-items-center -gap-2 -mt-10">
+            <PrimeButton label="Cancel" outlined class="w-8rem" @click="rejectCallback"></PrimeButton>
+            <PrimeButton label="Confirm" class="-w-8rem" @click="acceptCallback"></PrimeButton>
+
+          </div>
+        </div>
+      </template>
+    </PrimeConfirmDialog>
   </div>
 </template>
 
 <script lang="ts">
-import { ErrorMap, ExchangeDataModel, hasError } from "@/models";
+import { ExchangeDataModel, Token, hasError } from "@/models";
 import { useWalletStore } from "@/stores/wallet";
-import { isAddress } from "ethers/address";
 import { MenuItem } from "primevue/menuitem";
 import { computed, defineComponent, reactive, toRefs, watch } from "vue";
 import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
+import underscore from "underscore";
+import FXForm from "./FXForm.vue";
 
 export default defineComponent({
+  components: {
+    FXForm
+  },
   setup() {
-    const initModel = () => {
-      return {
-        amount: 0
-      } as ExchangeDataModel;
-    };
-
     const wallet = useWalletStore();
     const toast = useToast();
+    const confirm = useConfirm();
     const state = reactive({
       tabs: [
         { label: "Buy" },
@@ -95,39 +56,63 @@ export default defineComponent({
       ] as MenuItem[],
       tabIndex: 0,
       dxhAddress: computed(() => wallet.dxhAddress),
-
-      buyModel: initModel(),
-      sellModel: initModel(),
-      errors: {
-        buy: {} as ErrorMap<ExchangeDataModel>,
-        sell: {} as ErrorMap<ExchangeDataModel>
-      },
+      tokens: computed(() => wallet.tokens),
       busy: {
         buy: false,
         sell: false
       }
     });
 
-    watch(() => state.buyModel, _ => {
-      state.errors.buy = {} as ErrorMap<ExchangeDataModel>
-    }, { deep: true });
+    async function transfer(addr: string, amount: bigint, sym: string | undefined) {
+      const ares = await wallet.transferApproved(addr, amount);
 
-    watch(() => state.sellModel, _ => {
-      state.errors.sell = {} as ErrorMap<ExchangeDataModel>
-    }, { deep: true });
+      if (typeof ares != "boolean") {
+        toast.add({
+          severity: "error",
+          summary: "Failed to transfer tokens",
+          group: "fx-toast",
+          detail: ares.message,
+          life: 3000
+        });
 
-    function sell() {
-      const busy = state.busy;
-
-      if (busy.sell) {
         return;
       }
 
+      if (ares) {
+        return;
+      }
+
+      return confirm.require({
+        group: "fx-confirm",
+        header: "Transfer Approval",
+        message: `Transfer ${amount} ${sym ?? ""}?`,
+        accept: () => postApproval(addr, amount)
+      })
+    }
+
+    async function postApproval(addr: string, amount: bigint) {
+      const err = await wallet.approve(addr, amount);
+
+      if (err) {
+        toast.add({
+          severity: "error",
+          summary: "Failed to transfer tokens",
+          group: "fx-toast",
+          detail: err.message,
+          life: 3000
+        });
+      }
+
+      return sell(addr, amount);
+    }
+
+    function sell(addr: string, amount: bigint) {
+      const busy = state.busy;
       busy.sell = true;
-      wallet.sellFX(state.sellModel)
+      wallet.sellFX(addr, amount)
         .then((err) => {
           if (!err) {
-            state.sellModel = initModel();
+            // state.sellModel = initModel();
           } else {
             toast.add({
               severity: "error",
@@ -140,7 +125,7 @@ export default defineComponent({
         }).finally(() => busy.sell = false)
     }
 
-    function buy() {
+    function buy(addr: string, amount: bigint) {
       const busy = state.busy;
 
       if (busy.buy) {
@@ -148,10 +133,10 @@ export default defineComponent({
       }
 
       busy.buy = true;
-      wallet.buyFX(state.buyModel)
+      wallet.buyFX(addr, amount)
         .then((err) => {
           if (!err) {
-            state.buyModel = initModel();
+            // state.buyModel = initModel();
           } else {
             toast.add({
               severity: "error",
@@ -166,57 +151,39 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
-      setDefaultAddr(isBuy = true) {
-        if (isBuy) {
-          state.buyModel.address = state.dxhAddress;
-        } else {
-          state.sellModel.address = state.dxhAddress;
-        }
+      handleBuy(model: ExchangeDataModel, amount: bigint) {
+        buy(model.address, amount);
       },
-      submitBuy() {
-        const model = state.buyModel;
-        const errors = state.errors.buy;
-
-        if (!isAddress(model.address)) {
-          errors.address = "Please provide a valid token address";
+      handleSell(model: ExchangeDataModel, amount: bigint, token: Token | undefined) {
+        if (state.busy.sell) {
+          return;
         }
 
-        if (model.amount <= 0) {
-          errors.amount = "Please enter a valid amount";
-        }
+        const addr = model.address;
 
-        if (hasError(errors)) return;
-
-        buy();
-      },
-
-      submitSell() {
-        const model = state.sellModel;
-        const errors = state.errors.sell;
-
-        if (!isAddress(model.address)) {
-          errors.address = "Please provide a valid token address";
-        }
-
-        if (model.amount <= 0) {
-          errors.amount = "Please enter a valid amount";
-        }
-
-        if (hasError(errors)) return;
-
-        sell();
+        state.busy.sell = true;
+        transfer(addr, amount, token?.sym).finally(() => state.busy.sell = false);
       }
     }
   }
 })
 </script>
 
-<style scoped>
+<style lang="scss">
+@import "src/css/@include-media.scss";
+
 .exchange-panel {
   width: 80%;
   margin-left: auto;
   margin-right: auto;
   margin-top: 40px;
   padding: 20px;
+}
+
+@include media("<=tablet") {
+  .exchange-panel {
+    width: 100%;
+    padding: 10px;
+  }
 }
 </style>

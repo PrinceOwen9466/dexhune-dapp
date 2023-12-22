@@ -1,37 +1,36 @@
-import { ChainNetwork } from "@/models";
+import { ChainNetwork, Token } from "@/models";
 import { defineStore } from "pinia";
 import {
-	ethers,
 	BrowserProvider,
 	Eip1193Provider,
-	Interface,
 	Contract,
 	formatUnits,
+	parseUnits,
+	JsonRpcSigner,
 } from "ethers";
 import {
 	ABI_DEXHUNE_ERC20,
 	ABI_DEXHUNE_EXCHANGE,
 	ABI_DEXHUNE_PRICE_DAO,
+	ABI_IERC20,
 } from "@/models/abis";
-import { ContractFactory } from "ethers";
-import {
-	BYTECODE_DEXHUNE_EXCHANGE,
-	BYTECODE_DEXHUNE_PRICE_DAO,
-} from "@/models/bytecodes";
 import { DexhunePriceDAO } from "@/models/DexhunePriceDAO";
 import { DexhuneExchange } from "@/models/DexhuneExchange";
 import { DexhuneERC20 } from "@/models/DexhuneERC20";
 import { getDAppError } from ".";
+import { IERC20 } from "@/models/IERC20";
 
-// import DEXHUNE_EXCHANGE_ABI from "src/assets/abi/DexhuneExchange.abi.json";
-// import DEXHUNE_PRICE_DAO_ABI from "src/assets/abi/DexhunePriceDAO.abi.json";
-// import DEXHUNE_TOKEN_ABI from "src/assets/abi/DexhuneToken.abi.json";
+const NATIVE_TOKEN = "AVAX";
+const NATIVE_DECIMALS = 18;
 
 let DEXHUNE_EXCHANGE_ADDRESS: string;
 let DEXHUNE_DAO_ADDRESS: string;
 let DEXHUNE_TOKEN_ADDRESS: string;
 
-if (import.meta.env.DEV) {
+// const DEV = import.meta.env.DEV;
+const DEV = true;
+
+if (DEV) {
 	DEXHUNE_EXCHANGE_ADDRESS = "0x99BeF76E54061FF672B900f362943F3C28fe0038";
 	DEXHUNE_DAO_ADDRESS = "0x74d1cED2bE8814657C08fc1d1841AC3a9583285E";
 	DEXHUNE_TOKEN_ADDRESS = "0xDf33F9687E88BC05CDa7C3e48ADa09D526Cb6966";
@@ -51,11 +50,13 @@ export interface WalletState {
 	network: ChainNetwork;
 	projectId: string;
 	price: number;
-	provider?: BrowserProvider;
+	fetchedTokens: boolean;
+	tokens: Token[];
 
 	dao?: DexhunePriceDAO;
 	fx?: DexhuneExchange;
 	token?: DexhuneERC20;
+	tokenMap: Map<string, IERC20>;
 }
 
 const TESTNET_NETWORK: ChainNetwork = {
@@ -77,15 +78,22 @@ const MAIN_NETWORK: ChainNetwork = {
 const initialState = (): WalletState => ({
 	connected: false,
 	address: "",
-	network: import.meta.env.DEV ? TESTNET_NETWORK : MAIN_NETWORK,
+	network: DEV ? TESTNET_NETWORK : MAIN_NETWORK,
 	projectId: import.meta.env.VITE_APP_PROJECT_ID,
 	price: 0,
+
+	fetchedTokens: false,
+	tokens: [],
+	tokenMap: new Map<string, IERC20>(),
 });
+
+let _provider: BrowserProvider;
+let _signer: JsonRpcSigner;
 
 function getLink(addr: string) {
 	let baseUrl: string;
 
-	if (import.meta.env.DEV) {
+	if (DEV) {
 		baseUrl = "https://subnets-test.avax.network/c-chain/address/";
 	} else {
 		baseUrl = "https://subnets.avax.network/c-chain/address/";
@@ -114,6 +122,7 @@ export const useWalletStore = defineStore("Wallet", {
 		daoLink: () => getLink(DEXHUNE_DAO_ADDRESS),
 		tokenLink: () => getLink(DEXHUNE_TOKEN_ADDRESS),
 		dxhAddress: () => DEXHUNE_DAO_ADDRESS,
+		nativeTk: () => NATIVE_TOKEN,
 	},
 	actions: {
 		async queryPrice() {
@@ -122,30 +131,134 @@ export const useWalletStore = defineStore("Wallet", {
 			this.price = Number(formatUnits(price, 18));
 		},
 
+		_queryToken(addr: string) {
+			const n = this.tokens.findIndex((x) => x.addr == addr);
+
+			if (n >= 0) {
+				return this.tokens[n];
+			}
+
+			return undefined;
+		},
+
+		normalizeNative(amount: number) {
+			return parseUnits(amount.toFixed(NATIVE_DECIMALS), NATIVE_DECIMALS);
+		},
+
+		async normalizeAmount(tokenAddr: string, amount: number) {
+			const tk = this._queryToken(tokenAddr);
+			let dec: number;
+
+			if ((tk && !tk.decimals) || !tk) {
+				const etk = this.resolveToken(tokenAddr);
+
+				try {
+					// TODO: Multiple retries, then some sort of warning?
+					dec = Number(await etk.decimals());
+
+					if (tk) {
+						tk.decimals = dec;
+					}
+				} catch (err) {
+					console.error(err);
+					dec = 18;
+				}
+			} else dec = tk.decimals ?? 18;
+
+			return parseUnits(amount.toFixed(dec), dec);
+		},
+
+		resolveToken(addr: string) {
+			let tk: IERC20;
+
+			if (!this.tokenMap.has(addr)) {
+				tk = new Contract(addr, ABI_IERC20, _signer) as unknown as IERC20;
+
+				this.tokenMap.set(addr, tk);
+				return tk;
+			}
+
+			return this.tokenMap.get(addr) as IERC20;
+		},
+
 		async assignProvider(prov: Eip1193Provider) {
 			const provider = new BrowserProvider(prov);
 			const signer = await provider.getSigner();
 
 			this.address = await signer.getAddress();
-			this.provider = provider;
+			_provider = provider;
+			_signer = signer;
 
 			PriceDAO = PriceDAO.connect(signer);
 			Token = Token.connect(signer);
 			FX = FX.connect(signer);
 
+			this.fetchTokens();
+
 			this.connected = true;
 		},
 
-		async buyFX({ address, amount }: { address: string; amount: number }) {
-			const provider = this.provider;
+		async fetchTokens() {
+			if (this.fetchedTokens) return;
+
+			this.fetchedTokens = true;
+			let i = 1;
+
+			while (true) {
+				try {
+					// TODO: In the event of too many tokens, this might be a little problematic...
+					const tk = await FX.viewTokenByIndex(i++);
+
+					this.tokens.push({
+						tokenNo: Number(tk.tokenNo),
+						name: tk.name,
+						sym: tk.sym,
+						addr: tk.addr,
+						parityAddr: tk.parityAddr,
+						reward: Number(tk.reward),
+						rewardThreshold: Number(tk.rewardThreshold),
+						scheme: Number(tk.scheme),
+						price: Number(formatUnits(tk.price, 18)),
+						orders: Number(tk.orders),
+					});
+
+					console.log(this.tokens[this.tokens.length - 1].price);
+				} catch {
+					break;
+				}
+			}
+		},
+
+		async transferApproved(tokenAddr: string, amount: bigint) {
+			const tk = this.resolveToken(tokenAddr);
+			const fxAddr = DEXHUNE_EXCHANGE_ADDRESS;
+
+			try {
+				const allowed = await tk.allowance(this.address, fxAddr);
+				return allowed > amount;
+			} catch (err) {
+				return getDAppError(err);
+			}
+		},
+
+		async approve(tokenAddr: string, amount: bigint) {
+			const tk = this.resolveToken(tokenAddr);
+			const fxAddr = DEXHUNE_EXCHANGE_ADDRESS;
+
+			try {
+				await tk.approve(fxAddr, amount);
+			} catch (err) {
+				return getDAppError(err);
+			}
+		},
+
+		async buyFX(address: string, amount: bigint) {
+			const provider = _provider;
 			if (!provider) {
 				return;
 			}
 
-			console.log("Buying");
-
 			try {
-				console.log("Creating buy order: ", address, amount);
 				await FX.createBuyOrder(address, {
 					value: amount,
 				});
@@ -154,8 +267,8 @@ export const useWalletStore = defineStore("Wallet", {
 			}
 		},
 
-		async sellFX({ address, amount }: { address: string; amount: number }) {
-			const provider = this.provider;
+		async sellFX(address: string, amount: bigint) {
+			const provider = _provider;
 			if (!provider) {
 				return;
 			}

@@ -6,7 +6,7 @@
 
     <h3 class="-text-black -m-0">
 
-      1 DXH to {{ price.toFixed(2) }} AVAX
+      {{ price.toFixed(0) }} DXH to 1 AVAX
     </h3>
 
     <div class="-ml-auto -mt-4">

@@ -2,30 +2,41 @@
   <div class="bg-secondary app-header">
     <PrimeToast position="bottom-right" group="header-toast" />
     <div class="app-header-pattern">
-      <div class="-flex -p-3">
-        <h3 class="-text-3xl -break-normal -w-min -text-left -font-normal -mt-auto -mb-4">
+      <div class="-flex -p-1 md:-p-3">
+        <h3 class="-text-sm md:-text-3xl -break-normal -w-min -text-left -font-normal -mt-auto -mb-4">
           Peng Protocol's
         </h3>
-        <h2 class="-text-8xl -font-medium -mt-auto -mb-4 -ml-2">
+        <h2 class="-text-2xl -ml-1 lg:-text-8xl -font-medium -mt-auto -mb-4">
           Dexhune
         </h2>
 
-        <div class="-ml-auto -mt-auto -mb-4">
-          <PrimeButton v-if="!isConnected" label="Connect Wallet" raised @click="connect" />
+
+
+        <div class="-ml-auto -my-auto md:-mb-4">
+          <PrimeButton v-if="!isConnected" size="small" label="Connect Wallet" raised @click="connect" />
 
           <div v-else class="-flex">
-            <PrimeInputGroup>
-              <PrimeInputGroupAddon>
+            <PrimeInputGroup v-if="_mq.mdPlus" @click="handleCopy">
+              <PrimeInputGroupAddon v-if="_mq.mdPlus">
                 <i class='bx bxs-wallet'></i>
               </PrimeInputGroupAddon>
 
-              <PrimeInput :model-value="address" @click="handleCopy" />
+              <PrimeInput :model-value="address" size="small" @click="handleCopy" />
 
 
-              <PrimeButton severity="secondary" :loading="disconnecting" @click="disconnect">
+              <PrimeButton severity="secondary" :loading="disconnecting" size="small" @click="disconnect">
                 <i class='bx bxs-door-open'></i>
               </PrimeButton>
             </PrimeInputGroup>
+
+            <div v-else class="small-wallet">
+              <PrimeInput :model-value="address" size="small" aria-haspopup="true" aria-controls="small_menu"
+                aria-readonly="true" @click="toggleMenu" />
+              <PrimeMenu id="small_menu" ref="smallmenu" :model="menuItems" :popup="true" />
+            </div>
+
+
+
           </div>
         </div>
       </div>
@@ -34,7 +45,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "vue";
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers";
 import { EthersStoreUtilState } from "@web3modal/scaffold-utils/ethers";
 import { useWalletStore } from "src/stores/wallet";
@@ -42,6 +53,8 @@ import { useToast } from "primevue/usetoast";
 import {
   Eip1193Provider,
 } from "ethers";
+import { useMq } from "@/plugins/vue-mq";
+import Menu from "primevue/menu";
 
 type Web3Modal = ReturnType<typeof createWeb3Modal>;
 interface Web3ModalState {
@@ -76,12 +89,34 @@ export default defineComponent({
   setup() {
     const wallet = useWalletStore();
     const toast = useToast();
+    const _mq = useMq();
+
+
 
     const state = reactive({
+      _mq,
+      smallmenu: ref(undefined as undefined | Menu),
       modal: {} as Web3Modal,
       isConnected: computed(() => wallet.connected),
       address: computed(() => wallet.address),
-      disconnecting: false
+      disconnecting: false,
+      menuItems: [
+        {
+          label: "Actions",
+          items: [
+            {
+              label: "Copy Address",
+              icon: "bx bxs-copy",
+              command: copy,
+            },
+            {
+              label: "Disconnect",
+              icon: "bx bxs-door-open",
+              command: disconnect
+            }
+          ]
+        }
+      ]
     });
 
     function init() {
@@ -191,26 +226,36 @@ export default defineComponent({
 
     // modal.subscribeEvents((ev) => ev.)
 
+    function copy() {
+      navigator.clipboard.writeText(wallet.address)
+        .then(() => {
+          toast.add({
+            severity: "success",
+            summary: "Copied",
+            group: "header-toast",
+            detail: "Your wallet address has been copied to clipboard",
+            life: 3000
+          });
+        })
+    }
+
+    function disconnect() {
+      state.modal.open();
+      // state.disconnecting = true;
+      // state.modal.disconnect().finally(() => state.disconnecting = false);
+    }
+
     return {
       ...toRefs(state),
+      disconnect,
       connect() {
         state.modal.open();
       },
-      disconnect() {
-        state.disconnecting = true;
-        state.modal.disconnect().finally(() => state.disconnecting = false);
-      },
       handleCopy() {
-        navigator.clipboard.writeText(wallet.address)
-          .then(() => {
-            toast.add({
-              severity: "success",
-              summary: "Copied",
-              group: "header-toast",
-              detail: "Your wallet address has been copied to clipboard",
-              life: 3000
-            });
-          })
+        copy();
+      },
+      toggleMenu(ev: Event) {
+        state.smallmenu?.toggle(ev);
       }
     }
 
@@ -221,15 +266,25 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-// background: url(<path-to-image>), lightgray 0% 0% / 80.74866533279419px 80.74866533279419px repeat, linear-gradient(0deg, rgba(0, 0, 0, 0.20) 0%, rgba(0, 0, 0, 0.20) 100%), linear-gradient(87deg, #950101 76.24%, #3D0000 123.05%);
+@import "src/css/@include-media.scss";
+
 .app-header {
-  // background: linear-gradient(87deg, #950101 76.24%, #3D0000 123.05%);
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.20) 0%, rgba(0, 0, 0, 0.20) 100%), linear-gradient(87deg, #950101 76.24%, #3D0000 123.05%);
-  // background-image: ;
 }
 
 .app-header-pattern {
   background: url("../assets/peng_pattern.png");
   background-position: left -40px top -20px;
 }
+
+.small-wallet {
+  width: 80%;
+  margin-left: auto;
+
+  input {
+    width: 100%;
+  }
+}
+
+@include media("<=tablet") {}
 </style>

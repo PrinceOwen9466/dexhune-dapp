@@ -7,6 +7,7 @@ $secondaryTextColor: #fff;
 
 $secondaryDarkColor: #3d0000;
 
+
 .bg-secondary {
   background-color: $secondaryColor;
   color: $secondaryTextColor;
@@ -75,6 +76,27 @@ $secondaryDarkColor: #3d0000;
 .p-inputgroup-addon {
   background: $primaryDarkColor;
   border: 1px solid transparent;
+}
+
+.p-menu, .p-submenu-header, .p-menuitem-link {
+  background: $primaryDarkColor;
+}
+
+.p-menuitem-link {
+  font-size: 16px;
+}
+
+.p-dropdown-items {
+  background: $primaryDarkColor;
+}
+
+.p-dropdown-trigger, .p-dropdown {
+  background: $primaryDarkerColor;
+}
+
+.p-confirm-dialog {
+  background: $secondaryColor;
+  border: $primaryDarkerColor;
 }
 
 :root {

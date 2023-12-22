@@ -14,5 +14,22 @@ export default defineComponent({
 })
 </script>
 
-<style scoped>
+<style lang="scss">
+@import "src/css/@include-media.scss";
+
+.app-root {
+  padding: 2rem;
+}
+
+@include media("<=tablet") {
+  .app-root {
+    padding: 1rem;
+  }
+}
+
+@include media("<=phone") {
+  .app-root {
+    padding: .5rem;
+  }
+}
 </style>

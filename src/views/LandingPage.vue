@@ -2,7 +2,7 @@
   <div>
     <AppHeader />
 
-    <div class="bg-secondary -p-2 -mt-10 link-panel">
+    <div class="bg-secondary -p-2 -mt-6 md:-mt-19 link-panel">
       <a v-tooltip.bottom="'Github'" href="https://github.com/ElixExo/PengProtocol/tree/Dexhune" target="_blank">
         <img src="~/src/assets/github.svg" alt="">
       </a>
@@ -24,16 +24,14 @@
       </a>
     </div>
 
-    <div class="-flex">
-      <PricePanel v-if="isConnected" class="-ml-auto" />
+    <div class="-flex -mt-6">
+      <PricePanel v-if="isConnected" class="-mx-auto md:-mr-0" />
     </div>
 
-    <div class="-flex -bg-black -p-4 welcome-panel">
+    <div class="-flex -bg-black -p-3 md:-p-4 welcome-panel">
       <img src="~/src/assets/tbltve.png" alt="">
       <div class="-my-auto">
-        Swap Dx tokens for AVAX and vice versa! List your own pegged tokens relative to gold or any dataset! Dexhune is a
-        peer-based distributed exchange that connects buyers and sellers directly using fixed pricing derived from a
-        decentralized oracle, liquidity is enhanced by single-sided non-removable liquidity pools
+        Dexhune is permissionless orderbook! Turn your volume into liquidity!
       </div>
     </div>
 
@@ -42,14 +40,14 @@
     <PrimeCard class="-mt-20 illustration-card" style="background: #000">
       <template #content>
         <div class="illustration -flex -flex-col">
-          <img src="~/src/assets/illustrations/cherry/cherry-coming-soon.png" alt="Coming Soon" class="-mx-auto">
+          <img src="~/src/assets/illustrations/mirage-waiting2.png" alt="Coming Soon" class="-mx-auto">
 
           <h2 class="-mb-0">
-            💘 from Dexhune
+            We're working
           </h2>
 
           <h3 class="-mt-0">
-            We're working!.... More panels and features coming soon 😅
+            More panels and features coming soon
           </h3>
 
           <div class="-flex -mx-auto">
@@ -98,6 +96,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+@import "src/css/@include-media.scss";
+
 .link-panel {
   display: flex;
   width: min-content;
@@ -137,20 +137,42 @@ export default defineComponent({
 }
 
 .welcome-panel {
-  width: 80%;
+  width: 60%;
   margin-top: 40px;
+  margin-bottom: 80px;
   margin-left: auto;
   margin-right: auto;
   font-size: 24px;
+  font-weight: 500;
+  text-align: left;
 
   img {
-    height: 320px;
+    width: 150px;
+    object-fit: contain;
   }
 }
 
 .illustration {
   img {
     width: 300px;
+  }
+}
+
+@include media ("<=tablet") {
+  .welcome-panel {
+    width: 80%;
+  }
+}
+
+@include media("<=phone") {
+  .welcome-panel {
+    width: 90%;
+    font-size: 20px;
+    margin-bottom: 40px;
+
+    img {
+      width: 100px;
+    }
   }
 }
 </style>
