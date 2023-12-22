@@ -38,7 +38,7 @@
         <div v-if="isBuy || token.addr" class="-ml-2 -my-auto -font-semibold -opacity-70 -text-right ">
           <PrimeProgressSpinner v-if="normalizing" style="width: 20px; height: 20px; margin-bottom: -5px" stroke-width="4"
             animation-duration=".5s" />
-          {{ nAmount }} <span v-if="!isBuy">{{ token.sym }}</span><span v-else>{{ nativeTk }}</span>
+          {{ Number(model.amount) }} <span v-if="!isBuy">{{ token.sym }}</span><span v-else>{{ nativeTk }}</span>
         </div>
 
         <div v-if="isBuy" class="-ml-2 -my-auto -font-bold -opacity-90 -text-right ">
