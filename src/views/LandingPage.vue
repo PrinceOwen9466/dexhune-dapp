@@ -209,7 +209,6 @@ export default defineComponent({
   }
 
   .footer-stack {
-
     img {
       height: 45px;
     }

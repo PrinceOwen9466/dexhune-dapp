@@ -284,7 +284,7 @@ export default defineComponent({
   }
 
   .app-header-pattern {
-    background: url("../assets/peng_pattern.png");
+    // background: url("../assets/peng_pattern.png");
     background-position: left -40px top -20px;
   }
 }
