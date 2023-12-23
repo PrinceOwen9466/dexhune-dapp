@@ -270,9 +270,11 @@ export const useWalletStore = defineStore("Wallet", {
 			}
 
 			try {
-				await FX.createBuyOrder(address, {
+				const tx = await FX.createBuyOrder(address, {
 					value: amount,
 				});
+
+				await tx.wait();
 
 				await FX.settleOrders(address, true);
 			} catch (err) {
@@ -287,7 +289,8 @@ export const useWalletStore = defineStore("Wallet", {
 			}
 
 			try {
-				await FX.createSellOrder(address, amount);
+				const tx = await FX.createSellOrder(address, amount);
+				await tx.wait();
 				await FX.settleOrders(address, false);
 			} catch (err) {
 				return getDAppError(err);

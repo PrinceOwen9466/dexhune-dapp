@@ -1,5 +1,9 @@
 <template>
-  <div class="exchange-panel -flex -flex-col bg-dark-secondary">
+  <div class="exchange-panel -relative -flex -flex-col bg-dark-secondary">
+    <div class="-absolute -top-2 -right-2">
+      <PrimeButton v-tooltip.focus="tooltipText" icon="bx bxs-help-circle" link style="color: #fff" />
+    </div>
+
     <PrimeToast position="top-right" group="fx-toast" />
 
     <h2 class="-text-3xl -text-left -mt-1">
@@ -61,7 +65,8 @@ export default defineComponent({
         buy: false,
         sell: false,
         clear: false
-      }
+      },
+      tooltipText: "To swap a token; insert the token's contract address in the required field, or begin typing to find a list of preset tokens. Please do research into an asset before buying it. \n\nOnce you click 'buy' you will be promoted to sign (2) transactions, these are contract calls for 'createBuyOrder' and 'settleOrders' respectively, make sure the first one is fully processed before approving the second.\n\nWhen you attempt to sell you will get a prompt to approve the amount to be sold, you will get (3) transactions in your wallet,  'approve' 'createSellOrder' and 'settleOrders' respectively"
     });
 
     async function transfer(addr: string, amount: bigint, sym: string | undefined) {
@@ -80,7 +85,7 @@ export default defineComponent({
       }
 
       if (ares) {
-        return;
+        return postApproval(addr, amount);
       }
 
       return confirm.require({

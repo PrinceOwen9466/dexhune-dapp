@@ -99,6 +99,10 @@ $secondaryDarkColor: #3d0000;
   border: $primaryDarkerColor;
 }
 
+.p-tooltip-text, .p-tooltip-arrow {
+  background: $primaryDarkColor;
+}
+
 :root {
   --secondary-color: #950101;
   --secondary-dark-color: #3d0000;
